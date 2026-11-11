@@ -721,6 +721,11 @@ void Enumerator::configure_default_enumeration_strategies()
     tt_da326_enumeration_strategy->block_enable(false);
     (*strategies)[TT_DA326_UUID] = tt_da326_enumeration_strategy;
 
+    Metadata terasic_hololink_100g_metadata;
+    terasic_hololink_100g_metadata["board_description"] = "Terasic hololink 100G";
+    auto terasic_hololink_100g_enumeration_strategy = std::make_shared<BasicEnumerationStrategy>(terasic_hololink_100g_metadata);
+    (*strategies)[TERASIC_HOLOLINK_100G_UUID] = terasic_hololink_100g_enumeration_strategy;
+
     done = true;
 }
 

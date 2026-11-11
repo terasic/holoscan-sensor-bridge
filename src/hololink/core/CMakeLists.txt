@@ -16,6 +16,7 @@
 find_package(CUDAToolkit REQUIRED)
 
 add_library(hololink_core STATIC
+  altera_phy.cpp
   arp_wrapper.cpp
   data_channel.cpp
   enumerator.cpp

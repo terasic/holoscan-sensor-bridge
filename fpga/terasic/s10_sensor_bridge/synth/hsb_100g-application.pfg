@@ -1,0 +1,15 @@
+<pfg version="1">
+    <settings custom_db_dir="./" mode="ASX4"/>
+    <output_files>
+        <output_file name="hsb_100g-application" directory="output_files/" type="RPD">
+            <file_options/>
+            <bitstream_id>Bitstream_1</bitstream_id>
+        </output_file>
+    </output_files>
+    <bitstreams>
+        <bitstream id="Bitstream_1">
+            <path>output_files/hsb_100g.sof</path>
+        </bitstream>
+    </bitstreams>
+</pfg>
+

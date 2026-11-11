@@ -1,0 +1,141 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+######################################### Internal False Paths ###############################
+
+#Init_done goes to several modules
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_sys_init|done}] -to [get_keepers -no_duplicates {u_hololink_top|*}]
+
+#ECB RD/WR Controller
+# Response data is stable before the ecb_to_axis_rdresp is triggered
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rx_ls_parser|ecb_rdwr_ctrl_inst|resp_data*}] -to [get_keepers -no_duplicates {u_hololink_top|u_rx_ls_parser|ecb_rdwr_ctrl_inst|ecb_to_axis_rdresp|*}]
+# Header is sent with valid signal. Valid is synchronized into aclk domain so header should be stable when the synchronized valid asserts
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rx_ls_parser|ecb_rdwr_ctrl_inst|ecb_cmd*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rx_ls_parser|ecb_rdwr_ctrl_inst|ecb_flags*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rx_ls_parser|ecb_rdwr_ctrl_inst|ecb_seq*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rx_ls_parser|ecb_rdwr_ctrl_inst|cmd_addr*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rx_ls_parser|ecb_rdwr_ctrl_inst|cmd_dout*}]
+
+#SW reset to reset sync modules
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|u_apb_rst|srst*}] -to [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|u_hif_rst|*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|u_apb_rst|srst*}] -to [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|gen_sif_rx_rst[*].u_sif_rx_rst|*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|u_apb_rst|srst*}] -to [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|gen_sif_tx_rst[*].u_sif_tx_rst|*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|u_apb_rst|srst*}] -to [get_keepers -no_duplicates {*u_cdc_reset_handshake*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|u_apb_rst|srst*}] -to [get_keepers -no_duplicates {*u_dc_fifo*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|u_apb_rst|srst*}] -to [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|u_ptp_rst|*}]
+# Reset from register
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_glb_ctrl|u_reg_map|*.u_ctrl_cdc|a2b_reg_sync*}] -to [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|u_apb_rst|aasr_rst}]
+
+#DP CFG RAM - Corey to look at
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_dp_pkt_top|u_config_ram|*}] -to [get_keepers -no_duplicates {u_hololink_top|u_apb_intc|u_apb_ff_lvl2|apb_s2m_q.prdata*}]
+
+#EEPROM Info is static after fetching
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_eeprom_info|*}] -to [get_keepers -no_duplicates {u_hololink_top|gen_rx_parser*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_eeprom_info|*}] -to [get_keepers -no_duplicates {u_hololink_top|gen_eth_pkt*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|dev_mac_addr*}] -to [get_keepers -no_duplicates {*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_eeprom_info|*}] -to [get_keepers -no_duplicates {u_hololink_top|u_rx_ls_parser|u_bootp|*}]
+
+#s_apb_ram
+# Write data to RAM is latched in APB clock domain. The RAM wren is synchronized from the APB clock domain to the HIF clock domain. So the write data is stable when the wren asserts.
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_dp_pkt_top|u_config_ram|reg_wdata*}] -to [get_keepers -no_duplicates {u_hololink_top|u_dp_pkt_top|u_config_ram|blk_mem*}]
+# Write addr. Same as above.
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_dp_pkt_top|u_config_ram|reg_addr*}] -to [get_keepers -no_duplicates {u_hololink_top|u_dp_pkt_top|u_config_ram|blk_mem*}]
+# Read data is latched into the hif_clk domain from logic in the APB domain. The data should be stable before being consumed on the APB interface using rden that is synchronized from the hif_clk to the apb_clk.
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_dp_pkt_top|u_config_ram|reg_addr*}] -to [get_keepers -no_duplicates {u_hololink_top|u_dp_pkt_top|u_config_ram|reg_rdata_q*}]
+# The read data latched in the hif_clk also has dependency on the reg_address, which has dependency on reg_wren and reg_rden. The apb_clk signals should be stable so latching in the hif_clk should be ok. 
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_dp_pkt_top|u_config_ram|reg_wren}] -to [get_keepers -no_duplicates {u_hololink_top|u_dp_pkt_top|u_config_ram|reg_rdata_q*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_dp_pkt_top|u_config_ram|reg_rden}] -to [get_keepers -no_duplicates {u_hololink_top|u_dp_pkt_top|u_config_ram|reg_rdata_q*}]
+
+# Read data going back to the apb_clk domain. Will be stable prior to the signal indicating the APB command is done.
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_dp_pkt_top|u_config_ram|reg_rdata_q*}] -to [get_keepers -no_duplicates {u_hololink_top|u_apb_intc|u_apb_ff_lvl2|apb_s2m_q.prdata*}]
+
+
+##Packetizer
+# NOTE: the VP FIFO hierarchy changed in the updated IP. "vp_fifo" is now the
+# "axis_buffer" instance inside virtual_port, whose CDC FIFO is "axis_buffer_cdc",
+# and the Altera dcfifo megafunction was replaced by the RTL dc_fifo_generic (so
+# there is no longer an "auto_generated|rdaclr" or "u_reset_sync_rd" node). The
+# wildcard below covers both the packetizer and the bypass_vp variants.
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|gen_sif_rx_rst[*].u_sif_rx_rst|srst[1]}] -to [get_keepers -no_duplicates {u_hololink_top|gen_pack_inst[*].packetizer_top_inst|*|axis_buffer|axis_buffer_cdc|*}]
+
+
+##APB CDC - updated from original as that had only at hololink and below.
+set_false_path -from [get_keepers -no_duplicates {*|*u_ctrl_cdc*|a_reg_qq*}] -to [get_keepers -no_duplicates {*|*u_ctrl_cdc*|a2b_reg_sync*}]
+##APB CDC false path from the reg_cdc module valid latched in slow to fast
+set_false_path -from [get_keepers -no_duplicates {*|*u_ctrl_cdc*|a_val_qq*}] -to [get_keepers -no_duplicates {*|*u_ctrl_cdc*|a2b_val_sync*}]
+##APB CDC b2b sync
+set_false_path -from [get_keepers -no_duplicates {*|*u_ctrl_cdc*|a2b_val_sync*}] -to [get_keepers -no_duplicates {*|*u_ctrl_cdc*|b2a_ack_sync*}]
+
+
+#Async reset paths
+# NOTE: hl_sw_rst_sync / fpga_clk_pll_lock_sync / hif_pll_locked_sync are no longer
+# hand-coded [2:0] shift registers. They are now single-bit outputs of the 3-bit
+# "rst_and_lock_sync" data_sync instance in FPGA_top, so the registers to constrain
+# are rst_and_lock_sync|filter_pipe[*][*].
+set_false_path -from [get_keepers -no_duplicates {rst_and_lock_sync|filter_pipe[*][*]}] -to [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|*}]
+set_false_path -from [get_keepers -no_duplicates {rst_pb_debounce|debounce_sync[2]}] -to [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|*}]
+# PLL Locks
+set_false_path -from [get_keepers -no_duplicates {fpga_clk_pll|iopll_0|stratix10_altera_iopll_i|s10_iopll.fourteennm_pll~pll_e_reg__nff}] -to [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|*|aasr_rst*}]
+set_false_path -from [get_keepers -no_duplicates {hif_pll|iopll_0|stratix10_altera_iopll_i|s10_iopll.fourteennm_pll~pll_e_reg__nff}] -to [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|*|aasr_rst*}]
+set_false_path -from [get_keepers -no_duplicates {hif_pll|iopll_0|stratix10_altera_iopll_i|s10_iopll.fourteennm_pll~pll_e_reg__nff}] -to [get_keepers -no_duplicates {rst_and_lock_sync|filter_pipe[*][0]}]
+
+#HL Global Controller
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_glb_ctrl|u_reg_map|*u_ctrl_cdc|a2b_reg_sync*}] -to [get_keepers -no_duplicates {rst_and_lock_sync|filter_pipe[*][0]}]
+# NOTE: the hl_gpio outputs are now synchronized by the "hl_gpio_sync" data_sync
+# instance rather than the old hl_gpio_sync_0..3 registers.
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_glb_ctrl|u_reg_map|*}] -to [get_keepers -no_duplicates {hl_gpio_sync|filter_pipe[*][0]}]
+
+
+#PB Reset
+set_false_path -from [get_ports {FPGA_PB_RESET_L}] -to [get_registers {*}]
+
+#Clock Checker
+set_false_path -from [get_keepers -no_duplicates {u_gen_purpose_regs|u_gen_purpose_apb_reg|*}] -to [get_keepers -no_duplicates {u_clk_chk|*}]
+set_false_path -from [get_keepers -no_duplicates {heartbeat}] -to [get_keepers -no_duplicates {u_clk_chk|*}]
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|u_apb_rst|srst*}] -to [get_keepers -no_duplicates {u_clk_chk|*}]
+set_false_path -from [get_keepers -no_duplicates {u_clk_chk|*}] -to [get_keepers -no_duplicates {u_gen_purpose_regs|u_gen_purpose_apb_reg|*}]
+
+#Tx Stream Buffer and Pause
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|gen_stx_buf[*].u_tx_stream_buffer|u_sensor_tx_data_regs|[0].u_ctrl_cdc|a2b_reg_sync[*]}] -to [get_keepers -no_duplicates {u_hololink_top|gen_stx_buf[*].u_tx_stream_buffer|dbg_ena_output_sync[*]}]
+# NOTE: as above, the dcfifo megafunction nodes (auto_generated|rdaclr, u_reset_sync_rd)
+# no longer exist now that axis_buffer_cdc wraps the RTL dc_fifo_generic.
+set_false_path -from [get_keepers -no_duplicates {u_hololink_top|u_rst_gen|u_hif_rst|srst[1]*}] -to [get_keepers -no_duplicates {u_hololink_top|gen_stx_buf[*].u_tx_stream_buffer|*|axis_buffer_cdc|*}]
+
+# ######################################################################
+# nvidia jesd constraints
+
+# JESD
+#set_clock_groups -asynchronous -group $CLK100 \
+#-group $OSC_CLK \
+#-group [get_clocks {*jesd*|rx_clkout|ch*}] \
+#-group [get_clocks {*jesd*|tx_clkout|ch*}] \
+#-group [get_clocks {*u_jesd_core_pll|u_jesd_reconfig_pll|iopll_0_outclk0}] \
+#-group [get_clocks {*u_jesd_core_pll|u_jesd_reconfig_pll|iopll_0_refclk}]
+#
+##Hold violations across different XCVR instances.
+#set_false_path -from [get_keepers -no_duplicates {*jesd*|INTEL_serdes.NUM_OF_LANES_8.u_lane*_serdes_ln8|*|inst_ct1_hssi_pldadapt_tx~aib_tx_internal_div.reg}] -to [get_keepers -no_duplicates {*jesd*|INTEL_serdes.NUM_OF_LANES_8.u_lane*_serdes_ln8|*|inst_ct1_hssi_pldadapt_tx*__aibadpt__aib_fabric_tx_transfer_clk.reg}]
+
+
+proc apply_sdc_cdc {hier_path} {
+   set from_node_list [get_keepers -no_duplicates $hier_path|filter_pipe[*][0]]
+   set to_node_list [get_keepers -no_duplicates $hier_path|filter_pipe[*][1]]
+   
+   # False path on input pin CDC
+   set_false_path -to $from_node_list 
+}
+
+set inst_list [get_entity_instances data_sync]
+foreach each_inst $inst_list {
+   apply_sdc_cdc ${each_inst} 
+}

@@ -1,0 +1,17 @@
+synth/dni/
+synth/qdb/
+synth/output_files/
+synth/tmp-clearbox/
+pd/ip/**/*/**
+pd/jesd_ss/
+pd/.qsys_edit/
+altera_ip/100Gb_ethernet_v2/**/*/**
+altera_ip/fpga_clk_pll_mfg/**/*/**
+altera_ip/hif_pll/**/*/**
+altera_ip/mailbox_client/**/*/**
+altera_ip/reset_ip/**/*/**
+pd/board.info
+synth/hsb_100g.qws
+synth/da_drc.ini
+!*.ip
+!*.qsys
