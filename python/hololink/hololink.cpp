@@ -835,7 +835,7 @@ PYBIND11_MODULE(_hololink, m)
     gpio.attr("GPIO_PIN_RANGE") = Hololink::GPIO::GPIO_PIN_RANGE;
 
     py::class_<AD9986Config, std::shared_ptr<AD9986Config>>(m, "AD9986Config")
-        .def(py::init<Hololink&>(), "hololink"_a)
+        .def(py::init<Hololink&, const std::string&>(), "hololink"_a, "uuid"_a)
         .def("host_pause_mapping", &AD9986Config::host_pause_mapping, "mask"_a)
         .def("apply", &AD9986Config::apply)
         .def("verify_link_status", &AD9986Config::verify_link_status);
