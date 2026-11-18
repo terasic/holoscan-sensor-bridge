@@ -1,4 +1,4 @@
-# Holoscan Sensor Bridge
+# Terasic Stratix 10 Sensor Processing Kit – NVIDIA Holoscan Sensor Bridge
 
 ## Introduction
 
@@ -6,16 +6,13 @@ Holoscan Sensor Bridge provides a FPGA based interface for low-latency sensor da
 processing using GPUs. Peripheral device data is acquired by the FPGA and sent via UDP
 to the host system where ConnectX devices can write that UDP data directly into GPU
 memory. This software package supports integrating that equipment into Holoscan
-pipelines and provides several examples showing video processing and inference using an
-IMX274 camera with
-[Lattice Holoscan Sensor Bridge device](https://www.latticesemi.com/products/developmentboardsandkits/certuspro-nx-sensor-to-ethernet-bridge-board)
-or an IMX477 camera with
-[Microchip Holoscan Sensor Bridge](https://www.microchip.com/en-us/products/fpgas-and-plds/boards-and-kits/ethernet-sensor-bridge).
+pipelines and provides examples with the
+[Terasic Stratix 10 Sensor Processing Kit](./fpga/terasic/README.md).
 
 ## Setup
 
 Holoscan sensor bridge software comes with an
-[extensive user guide](https://docs.nvidia.com/holoscan/sensor-bridge/latest/),
+[extensive user guide](https://docs.nvidia.com/holoscan/sensor-bridge/2-7/getting-started/build),
 including instructions for setup on
 [NVIDIA IGX](https://www.nvidia.com/en-us/edge-computing/products/igx/) and
 [NVIDIA AGX](https://developer.nvidia.com/embedded/learn/jetson-agx-orin-devkit-user-guide/index.html)
@@ -31,7 +28,7 @@ link:
 ## Troubleshooting
 
 Be sure and check the
-[release notes](https://docs.nvidia.com/holoscan/sensor-bridge/latest/release_notes.html)
+[release notes](https://docs.nvidia.com/holoscan/sensor-bridge/2-7/support/release-notes)
 for frequently asked questions and troubleshooting tips.
 
 ## Submitting changes
