@@ -17,7 +17,7 @@ ADC data back to the host via RoCE.
 
 Hardware setup, host setup, Yocto SPI VM build, demo container build, running the demo
 and FPGA firmware update are described in the **HSB 100G User Guide**, available on the
-[Terasic Stratix 10 Sensor Processing Kit website](http://s10spk.terasic.com/).
+[Terasic Stratix 10 Sensor Processing Kit website](http://s10spk.terasic.com/cd).
 
 ## Pre-built FPGA Image
 
